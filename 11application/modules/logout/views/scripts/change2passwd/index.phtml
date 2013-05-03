@@ -1,0 +1,24 @@
+<h3>Změna hesla</h3>
+<form action="" method="post">
+    <table>
+        <tfoot>
+            <tr>
+                <td colspan="2" class="center"><?= $this->formSubmit("change", "Změnit heslo") ?></td>
+            </tr>
+        </tfoot>
+        <tbody>
+            <tr>
+                <th class="right"><label for="h0">Staré heslo :</label></th>
+                <td><?= $this->formPassword('h0', $_POST["h0"], array("id" => "h0", "size" => "24", "maxlength" => "32", "required" => "required")); ?></td>
+            </tr>
+            <tr>
+                <th class="right"><label for="h1">Nové heslo :</label></th>
+                <td><?= $this->formPassword('h1', $_POST["h1"], array("id" => "h1", "size" => "24", "maxlength" => "32", "required" => "required")); ?></td>
+            </tr>
+            <tr>
+                <th class="right"><label for="h2">Potvrzení nového hesla :</label></th>
+                <td><?= $this->formPassword('h2', $_POST["h2"], array("id" => "h2", "size" => "24", "maxlength" => "32", "required" => "required")); ?></td>
+            </tr>
+        </tbody>
+    </table>
+</form>

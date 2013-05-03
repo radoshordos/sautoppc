@@ -1,0 +1,27 @@
+<h3>AUTOMATIC</h3>
+<?php
+$db = Model_Zendb::myfactory();
+$res = $db->fetchAll($db->select()->from("log2auto2sklik")->order(array("las_id DESC"))->limit(40));
+?>
+
+<form action method="post">
+    <table>
+        <tbody>
+            <tr>
+                <td><?= $this->formSubmit("groups-by-rules", "Vytvořit sestavy dle pravidel"); ?></td>
+            </tr>
+        </tbody>
+    </table>    
+</form>
+
+<table>
+    <tbody>
+        <?php foreach ($res as $val) { ?>
+            <tr>
+                <td><?= $val->las_id; ?></td>
+                <td><?= $val->las_prod_name; ?></td>
+                <td><?= substr($val->las_message, 0, 168); ?></td>
+            </tr>
+        <?php } ?>
+    </tbody>
+</table>

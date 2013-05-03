@@ -1,0 +1,25 @@
+<table>
+    <thead>
+        <tr>
+            <th colspan="4">Spuštěné skripty</th>
+        </tr>
+        <tr>
+            <th>Název volané třídy</th>
+            <th>Čas celkem</th>
+            <th>Čas modulu</th>
+            <th>Zpráva</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (!empty($this->list_message)) { ?>
+            <?php foreach ($this->list_message as $val) { ?>
+                <tr>
+                    <td><?= $val->getCallClass(); ?></td>
+                    <td><?= $val->getTimeRunAll(); ?></td>                    
+                    <td><?= $val->getTimeRunClass(); ?></td>                                        
+                    <td><?= $val->getMessage(); ?></td>
+                </tr>
+            <?php } ?>
+        <?php } ?>
+    </tbody>
+</table>

@@ -1,0 +1,32 @@
+<h3>SklikAuto - Seznam úloh</h3>
+<?php
+$db = Model_Zendb::myfactory();
+$eacm = new Sklik_Model_Map_Em2execMapper();
+$eac = $eacm->fetchAll($db->fetchAll($db->select()->from("em2exec")->order(array("ex_id"))));
+?>
+<form action="" method="post">
+    <table>
+        <thead>
+            <tr>
+                <th>Autorun</th>
+                <th>Poslední<br />Autorun</th>
+                <th>Příštní<br />Autorun</th>
+                <th>První spuštění<br />během dne</th>
+                <th>Název volané třídy</th>
+                <th>Alias</th>
+            </tr>
+        </thead>
+        <?php if (count($eac) > 0) { ?>
+            <?php foreach ($eac as $row) { ?>
+                <tr>
+                    <td><?= $this->formSelect("ex_autorun[" . $row->getExId() . "]", $row->getExAutorun(), array("onchange" => "submit()"), array("0" => "NE", "1" => "ANO")); ?></td>
+                    <td><?= date("d.m.Y H:i", $row->getExRunTiLast()); ?></td>
+                    <td><?= date("d.m.Y H:i", $row->getExRunTiLast() + $row->getExRunNext()); ?></td>
+                    <td class="center"><?= date("H:i", mktime(0, 0, 0, date("m"), date("d"), date("Y")) + $row->getExRunDayFirst()); ?></td>
+                    <td><?= $this->formHidden("ex_id[" . $row->getExId() . "]") . $row->getExNameClass(); ?></td>
+                    <td class="center"><a href="<?= $this->url(array('controller' => 'sklik', 'action' => "auto2runner"), 'default', true) . Sklik_Model_Primary_Helper::getParamsGet(array('run' => $row->getExNameAlias())); ?>"><?= $row->getExNameAlias(); ?></a></td>
+                </tr>
+            <?php } ?>
+        <?php } ?>
+    </table>
+</form>

@@ -1,0 +1,172 @@
+<h3>KEYWORD LIST &amp; ADs</h3>
+<?php
+$ssm = new Sklik_Model_Primary_SelectForm();
+$console = new Sklik_Model_Primary_Console();
+$console->addSource("keywords", $this->keyword->listKeywords($_GET["group_id"]));
+$console->addSource("ads", $this->ad->listAds($_GET["group_id"]));
+?>
+
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Klíčová slova a inzeráty</a></li>
+        <li><a href="#tabs-2">Nová klíčová slova</a></li>
+        <li><a href="#tabs-3">Vytvořit banner</a></li>
+        <li><a href="#log">Log konzole</a></li>
+    </ul>
+    <div id="tabs-1">
+        <h4>Klíčová slova</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Název klíčového slova</th>
+                    <th>Stav</th>
+                    <th>Shoda<br />slova</th>
+                    <th>Vytvořeno</th>
+                    <th><span class="ui-icon ui-icon-trash"></span></th>
+                    <th>CTR</th>
+                    <th colspan="2">Akce</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <th colspan="2">Status</th>
+                    <td colspan="7"><?= $console->getStausInfoWithCount("keywords", "keywords"); ?></td>
+                </tr>
+            </tfoot>            
+            <tbody>
+                <?php if ($console->isExistsNamespace("keywords")) { ?>
+                    <?php foreach ($console->getNamespaceArray("keywords", "keywords") as $val) { ?>
+                        <tr>
+                            <td><?= $val["id"]; ?></td>
+                            <td><?= $val["name"]; ?></td>
+                            <td><?= $val["status"]; ?></td>
+                            <td><?= $val["matchType"]; ?></td>
+                            <td><?= Sklik_Model_Primary_Date::timestamp2Date_Ymd_hm($val["createDate"]); ?></td>
+                            <td><?= ($val["removed"] ? "ANO" : "NE"); ?></td>
+                            <td><?php if (!empty($val["cpc"])) echo $val["cpc"] . " hal"; ?></td>
+                            <td class="center"><a href="<?= $this->url(array("controller" => "sklik", "action" => "api2group2manage"), "default", true) . Sklik_Model_Primary_Helper::getParamsGet(array("group_id" => intval($_GET["group_id"]), "keyword_restore_id" => intval($val["id"]))); ?>"><span class="ui-icon ui-icon-arrowrefresh-1-n"></span></a></td>
+                            <td class="center"><a href="<?= $this->url(array("controller" => "sklik", "action" => "api2group2manage"), "default", true) . Sklik_Model_Primary_Helper::getParamsGet(array("group_id" => intval($_GET["group_id"]), "keyword_delete_id" => intval($val["id"]))); ?>"><span class="ui-icon ui-icon-closethick"></span></a></td>
+                        </tr>
+                    <?php } ?>
+                <?php } ?>
+            </tbody>
+        </table>
+        <h4>Inzeráty</h4>
+        <form action="" method="post">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="center"><span class="ui-icon ui-icon-circle-check"></span></th>
+                        <th>ID</th>
+                        <th>Stav</th>
+                        <th>Vytvořeno</th>
+                        <th>Titulek</th>
+                        <th>Popisek 1</th>
+                        <th>Popisek 2</th>
+                        <th>Klik Text</th>
+                        <th>Klik URL</th>           
+                        <th><span class="ui-icon ui-icon-trash"></span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($console->isExistsNamespace("ads")) { ?>
+                        <?php foreach ($console->getNamespaceArray("ads", "ads") as $v) { ?>
+                            <tr>
+                                <td class="center"><?= $this->formCheckbox("line[" . $v["id"] . "]"); ?></td>                                
+                                <td><?= $v["id"]; ?></td>
+                                <td><?= $v["status"]; ?></td>
+                                <td><?= Sklik_Model_Primary_Date::timestamp2Date_Ymd_hm($val["createDate"]); ?></td>
+                                <td><?= $v["creative1"]; ?></td>
+                                <td><?= $v["creative2"]; ?></td>
+                                <td><?= $v["creative3"]; ?></td>
+                                <td><?= $v["clickthruText"]; ?></td>
+                                <td><?= $v["clickthruUrl"]; ?></td>                    
+                                <td><?= (($v["removed"] == 1) ? "ANO" : "NE"); ?></td>
+                            </tr>
+                        <?php } ?>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div id="tabs-2">
+        <form action="<?= $this->url(array("controller" => "sklik", "action" => "api2group2manage"), "default", true); ?>?group_id=<?= intval($_GET["group_id"]) ?>" method="post">
+            <input type="hidden" name="group_id" value="<?= intval($_GET["group_id"]); ?>" />
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nové slovo</th>
+                        <th>Vzájemná shoda</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <td colspan="2"><?= $this->formSubmit("create-new-keywords", "Přidat nová slova"); ?></td>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    <?php for ($i = 1; $i < 10; $i++) { ?>
+                        <tr>
+                            <td><?= $this->formText("keyword[" . $i . "][name]", $_POST[$i]["keyword_name"], array("pattern" => "[\x20-\x7E]{5,40}", "title" => "Alespoň 5 běžných znaků", "size" => "40", "maxlength" => "32")); ?></td>
+                            <td><?= $this->formSelect("keyword[" . $i . "][match_type]", $_POST[$i]["keyword_match_type"], array("required" => "required"), $ssm->getSelectKeywordMatchCodeName()); ?></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div id="tabs-3">
+        <form action="#tabs-1" method="post">
+            <table>
+                <tfoot>
+                    <tr>
+                        <td colspan="2"><?= $this->formSubmit("create-new-ad", "Vyrvořit banner"); ?></td>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <th>creative1</th>
+                        <td><?= $this->formText("new-creative1", $_POST["new-creative1"], array("size" => "25", "maxlength" => "30")); ?></td>
+                    </tr>
+                    <tr>
+                        <th>creative2</th>
+                        <td><?= $this->formText("new-creative2", $_POST["new-creative2"], array("size" => "35", "maxlength" => "40")); ?></td>
+                    </tr>
+                    <tr>
+                        <th>creative3</th>
+                        <td><?= $this->formText("new-creative3", $_POST["new-creative3"], array("size" => "35", "maxlength" => "40")); ?></td>
+                    </tr>
+                    <tr>
+                        <th>clickthruText</th>
+                        <td><?= $this->formText("new-clickthru-text", $_POST["new-clickthru-text"], array("size" => "35", "maxlength" => "40")); ?></td>
+                    </tr>
+                    <tr>
+                        <th>clickthruUrl</th>
+                        <td><?= $this->formText("new-clickthru-url", $_POST["new-clickthru-url"], array("size" => "48", "maxlength" => "512")); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div id="log">
+        <table>
+            <thead>
+                <tr>
+                    <th>Keywords</th>
+                    <th>AD</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <textarea cols="150" rows="42"><?php print_r($console->getNamespaceNoSession("keywords")); ?></textarea>
+                    </td>
+                    <td>
+                        <textarea cols="150" rows="42"><?php print_r($console->getNamespaceNoSession("ads")); ?></textarea>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

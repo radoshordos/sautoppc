@@ -1,0 +1,121 @@
+<h3>Správa uživatelů</h3>
+<?php
+$db = Model_Zendb::myfactory();
+$af = new Admin_Model_AdminForm();
+
+$row = $db->fetchRow($db->select()
+                ->from("adm2users", array(
+                    "au_role",
+                    "au_active",
+                    "au_loginname",
+                    "au_name",
+                    "au_surname"
+                ))
+                ->where("au_id = ?", intval($_GET['user_id'])));
+?>
+
+<form action="" method="get">
+    <table>
+        <tr>
+            <th><label for="role_id">Zvolte uživatele: </label></th>
+            <td><?= $this->formSelect("user_id", $_GET["user_id"], array("id" => "user_id", "onchange" => "submit()"), $af->getSelectAdmUser()); ?></td>
+        </tr>
+    </table>
+</form>
+
+<?php if (intval($_GET["user_id"]) > 0) { ?>
+    <div id="tabs">
+        <ul>
+            <li><a href="#tabs-1">Nastavení účtu</a></li>
+            <li><a href="#tabs-2">Reset hesla</a></li>
+            <li><a href="#tabs-3">Nový účet</a></li>
+        </ul>
+        <div id="tabs-1">
+            <form action="" method="post">
+                <table>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" class="center"><?= $this->formSubmit("save-account", "Uložit") ?></td>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr>
+                            <th><label for="au_active">Účet: </label></th>
+                            <td><?= $this->formSelect("au_active", $row->au_active, array("id" => "au_active"), array("0" => "Neaktivní učet", "1" => "Aktivní učet")); ?></td>
+                        </tr>
+                        <tr>
+                            <th><label for="au_role">Role: </label></th>
+                            <td><?= $this->formSelect("au_role", $row->au_role, array("id" => "au_role"), array("users" => "users", "admins" => "admins")); ?></td>
+                        </tr>
+                        <tr>
+                            <th><label for="au_loginname">Přihlašovací jméno: </label></th>
+                            <td><?= $this->formText('au_loginname', $row->au_loginname, array("id" => "au_loginname", "size" => "32", "maxlength" => "32")); ?></td>
+                        </tr>
+                        <tr>
+                            <th><label for="au_name">Jméno: </label></th>
+                            <td><?= $this->formText('au_name', $row->au_name, array("id" => "au_name", "size" => "32", "maxlength" => "24")); ?></td>
+                        </tr>
+                        <tr>
+                            <th><label for="au_surname">Příjmení: </label></th>
+                            <td><?= $this->formText('au_surname', $row->au_surname, array("id" => "au_surname", "size" => "32", "maxlength" => "32")); ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <div id="tabs-2">
+            <form action="" method="post">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nové heslo</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <td><?= $this->formSubmit("change", "Reset hesla"); ?></td>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr>
+                            <td><?= $this->formPassword('p_change', NULL, array("id" => "p_change", "size" => "32", "maxlength" => "32")); ?></td>                            
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <div id="tabs-3">
+            <form action="" method="post">
+                <table>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" class="center"><?= $this->formSubmit("new-account", "Přidat nový účet") ?></td>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr>
+                            <th><label for="new_role">Role: </label></th>
+                            <td><?= $this->formSelect("new_role", $_POST['new_role'], array("id" => "new_role"), array("users" => "users", "admins" => "admins")); ?></td>
+                        </tr>
+                        <tr>
+                            <th><label for="new_loginname">Přihlašovací jméno: </label></th>
+                            <td><?= $this->formText('new_loginname', $row->new_loginname, array("id" => "new_loginname", "size" => "32", "maxlength" => "32")); ?></td>
+                        </tr>
+                        <tr>
+                            <th><label for="new_name">Jméno: </label></th>
+                            <td><?= $this->formText('new_name', $row->new_name, array("id" => "new_name", "size" => "32", "maxlength" => "24")); ?></td>
+                        </tr>
+                        <tr>
+                            <th><label for="new_surname">Příjmení: </label></th>
+                            <td><?= $this->formText('new_surname', $row->new_surname, array("id" => "new_surname", "size" => "32", "maxlength" => "32")); ?></td>
+                        </tr>
+                        <tr>
+                            <th><label for="new_password">Heslo: </label></th>
+                            <td><?= $this->formText('new_password', $row->new_password, array("id" => "new_password", "size" => "32", "maxlength" => "32")); ?></td>
+                        </tr>                        
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+<?php } ?>

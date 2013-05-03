@@ -1,0 +1,156 @@
+<h3>Správa reklamních banerů (Ad)</h3>
+<?php
+$db = Model_Zendb::myfactory();
+$sf = new Sklik_Model_Primary_SelectForm();
+$tree_list = $sf->getSelectTreeWithEmpty();
+$dev_list = $sf->getSelectDev();
+$campagn_list = $sf->getSelectCampaignList();
+$quality_list = $sf->getSelectAdQualityVisible();
+$em2ad = $db->fetchAll($db->select()->from("view2sklik2ad")->order(array("ea_id_campaign", "eat_id_tree", "eat_id_dev", "eaq_index")));
+$eatm = new Sklik_Model_Map_Em2ad2targetMapper();
+$em2ad2target = $eatm->fetchAll($db->fetchAll($db->select()->from("em2ad2target", array("eat_id_dev", "eat_id_tree"))->order(array("eat_id_dev", "eat_id_tree"))));
+?>
+
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Přehled šablon reklamních bannerů</a></li>
+        <li><a href="#tabs-2">Přidat banner</a></li>
+        <li><a href="#tabs-3">Zaměření umístění</a></li>        
+    </ul>
+    <div id="tabs-1">
+        <?php if (count($em2ad) > 0) { ?>
+            <form action="#tabs-1" method="post">
+                <table>
+                    <thead>
+                        <tr class="center">
+                            <th>Kampaň</th>
+                            <th>Skupina</th>
+                            <th>Výrobce</th>
+                            <th>Kvalita</th>
+                            <th>Titulek</th>
+                            <th>Řádek 1</th>
+                            <th>Řádek 2</th>
+                            <th><span class="ui-icon ui-icon-closethick"></span></th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <td colspan="8"><?= $this->formSubmit("update-ad-list", "Uložit"); ?></td>
+                        </tr>
+                        <tr>
+                            <td colspan="8" class="right">Celkem : <strong><?= intval(count($em2ad)); ?></strong> položek</td>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <?php foreach ($em2ad as $row) { ?>
+                            <tr class="center">
+                                <td><?= $this->formHidden("ea_id[$row->ea_id]", $row->ea_id) . $this->formText("ea_id_campaign[$row->ea_id]", $campagn_list[$row->ea_id_campaign], array("size" => "14", "maxlength" => "64", "readonly" => "readonly")); ?></td>
+                                <td><?= $this->formText("eat_id_tree[$row->ea_id]", $tree_list[$row->eat_id_tree], array("size" => "52", "maxlength" => "25", "readonly" => "readonly")); ?></td>
+                                <td><?= $this->formText("eat_id_dev[$row->ea_id]", $dev_list[$row->eat_id_dev], array("size" => "20", "maxlength" => "25", "readonly" => "readonly")); ?></td>
+                                <td><?= $this->formText("ea_id_quality[$row->ea_id]", $quality_list[$row->ea_id_quality], array("size" => "40", "maxlength" => "35", "readonly" => "readonly")); ?></td>
+                                <td><?= $this->formText("ea_creative1[$row->ea_id]", $row->ea_creative1, array("size" => "27", "maxlength" => "25")); ?></td>
+                                <td><?= $this->formText("ea_creative2[$row->ea_id]", $row->ea_creative2, array("size" => "39", "maxlength" => "35")); ?></td>
+                                <td><?= $this->formText("ea_creative3[$row->ea_id]", $row->ea_creative3, array("size" => "39", "maxlength" => "35")); ?></td>
+                                <td class="center"><a href="<?= $this->url(array('controller' => 'sklik', 'action' => 'local2ad'), 'default', true); ?>?ea_delete_id=<?= $row->ea_id ?>"><span class="ui-icon ui-icon-closethick"></span></a></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </form>
+        <?php } ?>
+    </div>
+    <div id="tabs-2">
+        <form action="#tabs-2" method="post">
+            <table>
+                <tfoot>
+                    <tr>
+                        <td colspan="2"><?= $this->formSubmit("new-ad", "Vytvořit banner"); ?></td>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <th>Kampaň:</th>
+                        <td><?= $this->formSelect("new-ad-campaign", $_POST["new-ad-campaign"], array("required" => "required"), $sf->getSelectCampaignListActive()); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Cíl:</th>
+                        <td><?= $this->formSelect("new-ad-target", $_POST["new-ad-target"], array("required" => "required"), $sf->getSelectAdTarget()); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Kvalita zažazení:</th>
+                        <td><?= $this->formSelect("new-ad-quality", $_POST["new-ad-quality"], array("required" => "required"), $sf->getSelectAdQualityVisible()); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Title:</th>
+                        <td><?= $this->formText("new-ea_creative1", $_POST["new-ea_creative1"], array("pattern" => ".{5,}", "title" => "Alespoň 5 znaků", "size" => "36", "maxlength" => "25", "required" => "required")); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Popisek 1:</th>
+                        <td><?= $this->formText("new-ea_creative2", $_POST["new-ea_creative2"], array("pattern" => ".{10,}", "title" => "Alespoň 10 znaků", "size" => "42", "maxlength" => "35", "required" => "required")); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Popisek 2:</th>
+                        <td><?= $this->formText("new-ea_creative3", $_POST["new-ea_creative3"], array("pattern" => ".{10,}", "title" => "Alespoň 10 znaků", "size" => "42", "maxlength" => "35", "required" => "required")); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Zástupné znaky</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Cena</th>
+                    <td>[PRICE]</td>
+                </tr>
+                <tr>
+                    <th>Název</th>
+                    <td>[NAME]</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="tabs-3">
+        <?php if (!empty($em2ad2target)) { ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Výrobce</th>
+                        <th>Skupina</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($em2ad2target as $val) { ?>
+                        <tr>
+                            <td><?= Sklik_Model_Primary_Helper::getStringName($val->getEatIdDev(), $sf->getSelectDevWithEmpty()); ?> </td>
+                            <td><?= Sklik_Model_Primary_Helper::getStringName($val->getEatIdTree(), $sf->getSelectTreeWithEmpty()); ?> </td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        <?php } ?>
+        <form action="#tabs-3" method="post">
+            <table>
+                <tfoot>
+                    <tr>
+                        <td colspan="2"><?= $this->formSubmit("new-target-submit", "Vytvořit nový cíl"); ?></td>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    <tr class="center">
+                        <th>Výrobce</th>
+                        <th>Skupina</th>
+                    </tr>
+                    <tr>
+                        <td><?= $this->formSelect("new-ad-target-dev", $_POST['new-ad-target-dev'], NULL, $sf->getSelectDev()); ?></td>
+                        <td><?= $this->formSelect("new-ad-target-tree", $_POST['new-ad-target-tree'], NULL, $sf->getSelectTree()); ?></td>
+                    </tr>                
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>

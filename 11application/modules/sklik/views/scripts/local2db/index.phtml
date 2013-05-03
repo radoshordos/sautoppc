@@ -1,0 +1,270 @@
+<h3>Lokální DB</h3>
+<?php
+$db = Model_Zendb::myfactory();
+$sf = new Sklik_Model_Primary_SelectForm();
+$edrm = new Sklik_Model_Map_Em2rulesMapper();
+$edrm_rules = $edrm->getAllFromRulesOrderPriority($db);
+$select = $db->select();
+
+switch (intval($_GET["sell"])) {
+    case 1 : $select->where("ed_param_sell != 'YES'");
+        break;
+    case 2 : $select->where("ed_param_sell == 'YES'");
+        break;
+}
+switch (intval($_GET["sendnow"])) {
+    case 1 : $select->where("ed_param_sendnow != 'YES'");
+        break;
+    case 2 : $select->where("ed_param_sendnow == 'YES'");
+        break;
+}
+switch (intval($_GET["action"])) {
+    case 1 : $select->where("ed_param_action != 'YES'");
+        break;
+    case 2 : $select->where("ed_param_action == 'YES'");
+        break;
+}
+switch (intval($_GET["filter_type"])) {
+    case 2 : $select->where("ed_prod_id IS NOT NULL");
+        break;
+    case 3 : $select->where("ed_prod_tree_id IS NOT NULL");
+        break;
+    case 4 : $select->where("ed_prod_dev_id IS NOT NULL");
+        break;
+}
+switch (intval($_GET["sortby"])) {
+    case 2 : $select->order(array("ed_id_campaign DESC", "view_name", "ed_id"));
+        break;
+    case 3 : $select->order(array("ed_id_mode", "view_name", "ed_id"));
+        break;
+    case 4 : $select->order(array("ed_ti_create DESC", "ed_id"));
+        break;
+    case 5 : $select->order(array("ed_ts_modifi DESC", "ed_id"));
+        break;
+    default: $select->order(array("view_name", "ed_id"));
+        break;
+}
+
+$select->from("view2sklik2db")
+        ->where((intval($_GET["campagin"]) > 0) ? $db->quoteInto("ed_id_campaign = ?", intval($_GET["campagin"])) : "1=1")
+        ->where((intval($_GET["mode"]) > 0) ? $db->quoteInto("ed_id_mode = ?", intval($_GET["mode"])) : "1=1")
+        ->where((intval($_GET["dev"]) > 0) ? $db->quoteInto("view_id_dev = ?", intval($_GET["dev"])) : "1=1")
+        ->where((strlen($_POST["search_db_name"]) > 0) ? $db->quoteInto("view_name LIKE ?", "%" . $_POST["search_db_name"] . "%") : "1=1")
+        ->order(array("view_name", "ed_id"));
+
+$pager = new Zend_Paginator(new Zend_Paginator_Adapter_DbSelect($select));
+$pager->setCurrentPageNumber(intval($_GET["page"]))->setItemCountPerPage(($_GET["limit"]) ? $_GET["limit"] : 25)->setPageRange(10);
+$pageLinks = new Model_Paginator($pager);
+?>
+
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Databáze slovních výrazů</a></li>
+        <li><a href="#tabs-2">Pravidla auto zařazení</a></li>
+        <li><a href="#tabs-3">Nové pravidlo auto zařazení</a></li>
+    </ul>
+    <div id="tabs-1">
+        <form action="" method="get">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kampaň</th>
+                        <th>Účel</th>
+                        <th>Výrobce</th>
+                        <th>Prodej</th>
+                        <th>Skladem</th>
+                        <th>Akce</th>
+                        <th>Řadit</th>
+                        <th>Limit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><?= $this->formSelect("campagin", $_GET["campagin"], array("onchange" => "submit()"), $sf->getSelectCampaignListWithEmpty()); ?></td>
+                        <td><?= $this->formSelect("mode", $_GET["mode"], array("onchange" => "submit()"), $sf->getSelectDbCacheModeWithEmpty()); ?></td>
+                        <td><?= $this->formSelect("dev", $_GET["dev"], array("onchange" => "submit()"), $sf->getSelectDevNoZeroWithEmpty()); ?></td>
+                        <td><?= $this->formSelect("sell", $_GET["sell"], array("onchange" => "submit()"), array("0" => "[A/N]", "1" => "NE", "2" => "ANO")); ?></td>
+                        <td><?= $this->formSelect("sendnow", $_GET["sendnow"], array("onchange" => "submit()"), array("0" => "[A/N]", "1" => "NE", "2" => "ANO")); ?></td>
+                        <td><?= $this->formSelect("action", $_GET["action"], array("onchange" => "submit()"), array("0" => "[A/N]", "1" => "NE", "2" => "ANO")); ?></td>
+                        <td><?= $this->formSelect("sortby", $_GET["sortby"], array("onchange" => "submit()"), array("1" => "podle Názvu", "2" => "podle Kampaně", "3" => "podle Účelu", "4" => "podle Data vytoření", "5" => "podle Data poslení změny")); ?></td>
+                        <td><?= $this->formSelect("limit", $_GET["limit"], array("onchange" => "submit()"), array("25" => "25", "100" => "100", "400" => "400")); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+        <?php if ($pager->getTotalItemCount() > 0) { ?>
+            <form action="" method="post">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><?= $this->formCheckbox("checkAllAuto"); ?></th>
+                            <th>Poslední<br />změna</th>
+                            <th>Kampaň</th>
+                            <th>CS</th>
+                            <th>CW</th>
+                            <th>Název<br /><?= $this->formText("search_db_name", $_POST["search_db_name"], array("id" => "search_db_name", "size" => "32", "maxlength" => "64")); ?></td></th>
+                            <th>Účel</th>
+                            <th>Cena</th>
+                            <th>Prodej</th>                
+                            <th>Akce</th>
+                            <th>Skladem</th>
+                            <th>Q</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <td colspan="7" id="paginator" class="center"><?= implode($pageLinks->getPageLinks(), ""); ?></td>
+                            <td colspan="5" class="right">Celkem : <strong><?= $pager->getTotalItemCount(); ?></strong> záznamů</td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" class="center"><?= $this->formSelect("ed_action", NULL, NULL, array("no" => "Žádná akce", "delete-line" => "Odstranit zvolené řádky", "update-db-mode" => "Nastavit zvolený účel")) . $this->formSubmit("submit-action", "OK"); ?></td>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <?php foreach ($pager->getCurrentItems() as $row) { ?>
+                            <tr>
+                                <td><?= $this->formCheckbox("ed_id[" . $row->ed_id . "]"); ?></td>
+                                <td><?= $row->view_db_date_modifi; ?></td>
+                                <td><?= $row->ec_name; ?></td>
+                                <td><?= $row->ed_param_name_count; ?></td>
+                                <td class="center"><?= $row->ed_param_name_word; ?></td>
+                                <td><?= $row->view_name; ?></td>
+                                <td><?= $this->formSelect("db_mode[" . $row->ed_id . "]", $row->ed_id_mode, (($row->ed_id_mode == 1) ? NULL : array("disabled" => "disabled")), $sf->getSelectDbCacheMode()); ?></td>
+                                <td><?= $row->ed_param_price; ?></td>
+                                <td><?= Sklik_Model_Primary_Helper::getStringName($row->ed_param_sell, array("" => "", "NO" => "NE", "YES" => "ANO")); ?></td>                                        
+                                <td><?= Sklik_Model_Primary_Helper::getStringName($row->ed_param_action, array("" => "", "NO" => "NE", "YES" => "ANO")); ?></td>
+                                <td><?= Sklik_Model_Primary_Helper::getStringName($row->ed_param_sendnow, array("" => "", "NO" => "NE", "YES" => "ANO")); ?></td>
+                                <td><?= $row->ed_param_index; ?></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </form>
+        <?php } ?>
+    </div>
+    <div id="tabs-2">
+        <form action="#tabs-2" method="post">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2">Priorita</th>                    
+                        <th rowspan="2"><strong>Pravidlo<br />pro</strong></th>
+                        <th rowspan="2">Kampaň</th>
+                        <th rowspan="2">Výrobce</th>
+                        <th rowspan="2">Skupina</th>
+                        <th colspan="2">Počet znaků</th>
+                        <th colspan="2">Počet slov</th>
+                        <th colspan="2">Rozsah cen</th>
+                        <th rowspan="2">Prodej</th>
+                        <th rowspan="2">Akce</th>
+                        <th rowspan="2">Skladem</th>
+                        <td rowspan="2">X</td>
+                    </tr>
+                    <tr>
+                        <th>MIN</th>
+                        <th>MAX</th>
+                        <th>MIN</th>
+                        <th>MAX</th>
+                        <th>MIN</th>
+                        <th>MAX</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <td colspan="15"><?= $this->formSubmit("update-priority-list", "Uložit"); ?></td>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    <?php if (!empty($edrm_rules)) { ?>
+                        <?php foreach ($edrm_rules as $val) { ?>
+                            <tr>
+                                <td><?= $this->formSelect("priority[" . $val->getErId() . "]", $val->getErIdPriority(), NULL, $sf->getSelectRulesPriorytyVisible()); ?></td>
+                                <td><?= Sklik_Model_Primary_Helper::getStringName($val->getErIdSetDbmode(), $sf->getSelectDbCacheModeActive()) ?></td>
+                                <td><?= Sklik_Model_Primary_Helper::getStringName($val->getErIdCampagn(), $sf->getSelectCampaignList()) ?></td>
+                                <td><?= Sklik_Model_Primary_Helper::getStringName($val->getErIdDev(), $sf->getSelectDev()) ?></td>
+                                <td><?= Sklik_Model_Primary_Helper::getStringName($val->getErIdTree(), $sf->getSelectTreeWithEmpty()) ?></td>
+                                <td><?= $val->getErParamNameLenghtMin(); ?></td>
+                                <td><?= $val->getErParamNameLenghtMax(); ?></td>
+                                <td><?= $val->getErParamNameWordmin(); ?></td>
+                                <td><?= $val->getErParamNameWordmax(); ?></td>
+                                <td><?= $val->getErParamPricemin(); ?></td>
+                                <td><?= $val->getErParamPricemax() ?></td>
+                                <td><?= Sklik_Model_Primary_Helper::getStringName($val->getErParamSell(), array("" => "", "NO" => "NE", "YES" => "ANO")); ?></td>
+                                <td><?= Sklik_Model_Primary_Helper::getStringName($val->getErParamAction(), array("" => "", "NO" => "NE", "YES" => "ANO")); ?></td>
+                                <td><?= Sklik_Model_Primary_Helper::getStringName($val->getErParamSendNow(), array("" => "", "NO" => "NE", "YES" => "ANO")); ?></td>
+                                <td class="center"><a href="<?= $this->url(array("controller" => "sklik", "action" => "local2db"), "default", true); ?>?rule_delete_id=<?= intval($val->getErId()); ?>#tabs-2"><span class="ui-icon ui-icon-closethick"></span></a></td>
+                            </tr>
+                        <?php } ?>
+                    <?php } ?>
+                <tbody>
+            </table>
+        </form>
+    </div>
+    <div id="tabs-3">
+        <form action="#tabs-3" method="post">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2">Nastavit automaticky hodnoty</th>
+                    </tr>
+                </thead>                
+                <tbody>
+                    <tr>
+                        <th>Pravidlo typu</th>
+                        <td><?= $this->formSelect("er_id_set_dbmode", $_POST["er_id_set_dbmode"], array("required" => "required", "onchange" => "submit()"), $sf->getSelectDbCacheModeActive()); ?></td>
+                    </tr>                  
+                </tbody>            
+            </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2">Pravidla</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <td colspan="2"><?= $this->formSubmit("add-new-rule", "Přidat pravidlo"); ?></td>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <th>Kampaň</th>
+                        <td><?= $this->formSelect("er_id_campagn", $_POST["er_id_campagn"], NULL, $sf->getSelectCampaignListActiveWithEmpty()); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Výrobce</th>
+                        <td><?= $this->formSelect("er_id_dev", $_POST["er_id_dev"], NULL, $sf->getSelectDevNoZeroWithEmpty()); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Skupina</th>
+                        <td><?= $this->formSelect("er_id_tree", $_POST["er_id_tree"], NULL, $sf->getSelectTreeWithEmptyNoZero()); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Rozsah znaků v názvu</th>
+                        <td><input type="number" name="er_param_name_lenghtmin" min="1" max="120" step="1" value="<?= $_POST["er_param_name_lenghtmin"]; ?>"> - <input type="number" name="er_param_name_lenghtmax" min="1" max="120" step="1" value="<?= $_POST["er_param_name_lenghtmax"]; ?>"></td>
+                    </tr>
+                    <tr>
+                        <th>Rozsah slov v názvu</th>
+                        <td><input type="number" name="er_param_name_wordmin" min="1" max="20" step="1" value="<?= $_POST["er_param_name_wordmin"]; ?>"> - <input type="number" name="er_param_name_wordmax" min="1" max="20" step="1" value="<?= $_POST["er_param_name_wordmax"]; ?>"></td>
+                    </tr>
+                    <tr>
+                        <th>Rozsah ceny</th>
+                        <td><input type="number" name="er_param_pricemin" min="100" max="1000000" step="10" value="<?= $_POST["er_param_pricemin"]; ?>"> - <input type="number" name="er_param_pricemax" min="100" max="1000000" step="10" value="<?= $_POST["er_param_pricemax"]; ?>"></td>
+                    </tr>
+                    <tr>
+                        <th>Prodává se</th>
+                        <td><?= $this->formSelect("er_param_sell", $_POST["er_param_sell"], NULL, array("" => "", "NO" => "NE", "YES" => "ANO")); ?></td>
+                    </tr>                        
+                    <tr>
+                        <th>Je v akci</th>
+                        <td><?= $this->formSelect("er_param_action", $_POST["er_param_action"], NULL, array("" => "", "NO" => "NE", "YES" => "ANO")); ?></td>
+                    </tr>                                           
+                    <tr>
+                        <th>Je skladem</th>
+                        <td><?= $this->formSelect("er_param_sendnow", $_POST["er_param_sendnow"], NULL, array("" => "", "NO" => "NE", "YES" => "ANO")); ?></td>
+                    </tr>                                           
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>

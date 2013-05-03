@@ -1,0 +1,27 @@
+<?php echo $this->doctype() . "\n"; ?>
+<html lang="cs-cz" dir="ltr">
+    <head>
+        <meta charset="UTF-8">
+        <title>SPPCA</title>
+        <?php
+        echo $this->headLink()->appendStylesheet(Zend_Controller_Front::getInstance()->getBaseUrl() . '/js/jquery/themes/base/jquery-ui.css')
+                ->appendStylesheet(Zend_Controller_Front::getInstance()->getBaseUrl() . '/js/toastmess/css/jquery.toastmessage.css')
+                ->appendStylesheet(Zend_Controller_Front::getInstance()->getBaseUrl() . '/css/style.css') . "\n\t";
+        echo $this->headScript()->appendFile(Zend_Controller_Front::getInstance()->getBaseUrl() . '/js/jquery/jquery-1.8.3.min.js', 'text/javascript')
+                ->appendFile(Zend_Controller_Front::getInstance()->getBaseUrl() . '/js/jquery/jquery-ui-1.9.2.custom.min.js', 'text/javascript')
+                ->appendFile(Zend_Controller_Front::getInstance()->getBaseUrl() . '/js/toastmess/jquery.toastmessage.js', 'text/javascript')
+                ->appendFile(Zend_Controller_Front::getInstance()->getBaseUrl() . '/js/jqs.js', 'text/javascript') . "\n\t";
+        ?>
+    </head>
+    <body>
+        <header>
+            <div id="part-x1">
+                <h1 id="left_img"><a href="http://localhost/sautoppc/" title="Admin centrum">Admin centrum<span><!-- --></span></a></h1>
+            </div>
+            <div id="part-x2"></div>
+            <div id="part-x3"></div>
+        </header>
+        <nav><?= $this->navigation(); ?></nav>
+        <section id="moduls"><?= $this->layout()->content; ?></section>
+    </body>
+</html>

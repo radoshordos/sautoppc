@@ -1,0 +1,70 @@
+*               	{padding:0;margin:0}
+*[readonly="readonly"]  {background: #159;color: white}
+body    		{margin:0 5px;font-family: Verdana,Tahoma,sans-serif;font-size: 0.8em}
+hr                      {border: 8px double #9DBF9B;margin: 20px 10%}
+
+textarea                {font-family: Tahoma !important;font-size: 1em}
+option                  {font-family: Tahoma !important;font-size: 1em}
+select                  {font-family: Tahoma !important;font-size: 1em}
+input                   {font-family: Tahoma !important;font-size: 1em}
+
+input[type="submit"],input[type="file"]     {padding: 2px 4px}
+select[class="readonly"]                    {background-color: #258;color: #FFF;border: none}
+input[class="readonly"]                     {background-color: #258;color: #FFF;border: none}
+input[type="month"],input[type="number"]    {font-size: 125%}
+
+header                          {width:auto;height:29px;background:url("img/logo-middle.png") top right repeat-x;line-height:2.2em;font-weight: bold}
+header #part-x1                 {float:left;font-size:0.6em;width:19%}
+header #part-x1 #left_img       {margin:0;padding:0;text-align:left;width:auto;position:relative;margin:0;padding:0;overflow:hidden}
+header #part-x1 #left_img span  {display:block;position:absolute;left:0px;top:0;z-index:1;width:100%;height:29px;margin:0;padding:0;background:url("img/logo-left.png") top left no-repeat;background-position:-10px 0px}
+header #part-x2                 {float:left;width:60%;text-align:center;display: block}
+header #part-x3                 {float:right;width:20%;background:url("img/logo-right.png") top right no-repeat;display: block}
+
+nav                             {font-size: 0.8em;width:100%;padding:0;float:right;min-height:1em;background:#159;border-top:1px solid #9bc6cf;border-bottom:1px solid #9bc6cf;margin-bottom:5px}
+section                         {margin:2px;text-align: center;clear: both}
+section h3                      {display: none}
+div#tabs                        {font-size: 1em;font-family: Verdana !important}
+
+
+table                               {margin: 0 auto;border: 3px solid darkorange !important;border-collapse:collapse;font-size: 0.8em;margin: 9px auto 5px auto}
+table table                         {font-size: 1.1em}
+table img                           {border: none}
+thead th,thead td, tbody tr.head th {background: #ccc;color: black;padding: 2px 4px;border: 1px solid #888;text-align:center}
+thead dd                            {margin: 2px 0 3px 0}
+thead input[type="submit"]          {margin: 3px;font-size: 1.2em;padding:3px 4px}
+tbody tr th                         {background: #538FBF;color: white;text-align: right;padding:0 5px}
+tbody tr td                         {text-align: left;padding: 2px 4px 2px 4px;border: 1px solid white}
+tbody tr textarea                   {font-size: 1em}
+tbody tr:nth-child(2n+1)            {background-color: #9FCBFF}
+tbody tr:nth-child(2n+0)            {background-color: #90AFDF}
+tbody td input[type="checkbox"]     {margin: 3px 3px 1px 0px}
+tfoot td                            {background: #ccc;padding: 4px 5px;border: 1px solid #888 }
+tfoot input                         {font-size: 1.2em}
+tfoot input[type="submit"]          {padding:6px 35px;margin:5px 4px}
+
+.left,.left td,.left th         {text-align: left}
+.center,.center td,.center th   {text-align: center}
+.right,.right td,.right th      {text-align: right}
+.small                          {font-size: 80%}
+.big                            {font-size: 120%}
+.message                        {color: red;font-size: 1.2em;font-weight: bold}
+
+form#login                      {border:3px solid #9FCBFF;text-align:center;width:500px;background:#159;color:#fff;margin:80px auto;padding:14px 0 12px 0;font-weight:bold;border-radius:30px}
+
+ul.navigation			{margin-left:10px;font-size: 1em;}
+ul.navigation li		{list-style:none;float:left;width:10em;text-align:left;background:#159;-moz-border-radius:6px}
+ul.navigation li a		{display:block;padding:3px 2px 3px 4px;text-decoration:none;color:#fff;font-weight:bolder}
+ul.navigation li a span         {text-decoration:underline}
+ul.navigation li a:hover,ul.navigation li a:focus {color:#eb7f10;background:#111;text-decoration:underline;-moz-border-radius:6px;}
+ul.navigation ul		{position:absolute;width:13em;display:none}
+ul.navigation ul li		{border-bottom:1px solid #3af;border-left:2px solid #3af;width:18em;border-right:2px solid #3af;border-top:1px solid #3af}
+ul.navigation li:hover ul,ul.navigation li a:hover {display:block;z-index:3}
+
+dl.zend_form            {text-align: center;background:#ccc}
+ul.errors               {background: red;color: white;font-weight: bold;padding: 2px}
+ul.errors li            {list-style-type: none}
+
+td#paginator            {height:18px;padding:6px 2px}
+td#paginator strong     {padding:2px 4px}
+td#paginator a          {border:1px solid #159;padding:2px 4px;background:#DFCC66;color:#000;text-decoration:none;font-size:130%;margin:1px}
+td#paginator a:hover,td#paginator a:focus {background:#FF0}

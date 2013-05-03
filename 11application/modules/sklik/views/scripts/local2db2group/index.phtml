@@ -1,0 +1,106 @@
+<h3>Lokální sestavy (Groups)</h3>
+<?php
+$sf = new Sklik_Model_Primary_SelectForm();
+$smmvsgm = new Sklik_Model_Map_View2sklik2groupMapper();
+$db = Model_Zendb::myfactory();
+$select = $db->select();
+
+switch (intval($_GET['sklik'])) {
+    case 2 : $select->where('eg_sklik_id IS NOT NULL');
+        break;
+    case 3 : $select->where('eg_sklik_id IS NULL');
+        break;
+}
+
+switch (intval($_GET['sortby'])) {
+    case 2 : $select->order(array('eg_group_cpc'));
+        break;
+    case 3 : $select->order(array('eg_tg_keyword_count'));
+        break;
+    case 4 : $select->order(array("eg_ti_create DESC", "eg_id"));
+        break;
+    case 5 : $select->order(array("eg_ts_update DESC", "eg_id"));
+        break;
+    default: $select->order(array('eg_group_name'));
+        break;
+}
+
+$select->from("view2sklik2group")
+        ->where((strlen($_GET['eg_group_cpc']) > 0) ? $db->quoteInto('eg_group_cpc = ?', intval($_GET['eg_group_cpc'])) : "1=1")
+        ->where((intval($_GET["ed_id_campaign"]) > 0) ? $db->quoteInto("ed_id_campaign = ?", intval($_GET['ed_id_campaign'])) : "1=1")
+        ->where((intval($_POST["eg_tg_keyword_count"]) > 0) ? $db->quoteInto("eg_tg_keyword_count = ?", intval($_POST['eg_tg_keyword_count'])) : "1=1")
+        ->where((!empty($_POST['eg_group_name'])) ? $db->quoteInto('eg_group_name LIKE ?', "%" . trim($_POST['eg_group_name']) . "%") : "1=1")
+        ->where((!empty($_POST['view_url_group'])) ? $db->quoteInto('view_url_group LIKE ?', "%" . trim($_POST['view_url_group']) . "%") : "1=1")
+        ->order(array("eg_id"));
+
+$pager = new Zend_Paginator(new Zend_Paginator_Adapter_DbSelect($select));
+$pager->setCurrentPageNumber(intval($_GET['page']))->setItemCountPerPage(($_GET["limit"]) ? $_GET["limit"] : 25)->setPageRange(10);
+$pageLinks = new Model_Paginator($pager);
+?>
+
+<form action="" method="get">
+    <table>
+        <thead>
+            <tr>
+                <th>Kampaň</th>
+                <th>Sklik</th>
+                <th>Max CPC</th>
+                <th>Řadit</th>
+                <th>Limit</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><?= $this->formSelect("ed_id_campaign", $_GET["ed_id_campaign"], array("onchange" => "submit()"), $sf->getSelectCampaignListActiveWithEmpty()); ?></td>
+                <td><?= $this->formSelect("sklik", $_GET["sklik"], array("onchange" => "submit()"), array('1' => '', '2' => 'ANO', '3' => 'NE')); ?></td>
+                <td><?= $this->formSelect("eg_group_cpc", $_GET["eg_group_cpc"], array("onchange" => "submit()"), $sf->getSelectGruopCpcListWithEmpty()); ?></td>
+                <td><?= $this->formSelect("sortby", $_GET["sortby"], array("onchange" => "submit()"), array('1' => 'podle Názvu sestavy', '2' => 'podle CPC max', '3' => 'podle množství klíčových slov', "4" => "podle Data vytoření", "5" => "podle Data poslení změny")); ?></td>
+                <td><?= $this->formSelect("limit", $_GET["limit"], array("onchange" => "submit()"), array('25' => '25', '100' => '100', '400' => '400')); ?></td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+<?php if ($pager->getTotalItemCount() > 0) { ?>
+    <form action="" method="post">
+        <table>
+            <thead>
+                <tr>
+                    <th class="center" rowspan="2"><?= $this->formCheckbox("checkAllAuto"); ?></th>
+                    <th rowspan="2">Poslední<br />změna</th>
+                    <th rowspan="2">Sklik ID</th>
+                    <th><label for="eg_tg_keyword_count">KWs</label></th>
+                    <th><label for="eg_group_name">Název sestavy</label></th>
+                    <th rowspan="2">Max. CPC<br />haléřů</th>
+                    <th><label for="umt_dir">Adresa: clickthru_url</label></th>
+                </tr>
+                <tr>
+                    <td><?= $this->formText('eg_tg_keyword_count', $_POST['eg_tg_keyword_count'], array("id" => "eg_tg_keyword_count", "size" => "2", "maxlength" => "5")); ?></td>                
+                    <td><?= $this->formText('eg_group_name', $_POST['eg_group_name'], array("id" => "eg_group_name", "size" => "24", "maxlength" => "48")); ?></td>
+                    <td><?= $this->formText('view_url_group', $_POST['view_url_group'], array("id" => "view_url_group", "size" => "120", "maxlength" => "128")); ?></td>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td colspan="6" id="paginator"><?= implode($pageLinks->getPageLinks(), ""); ?></td>
+                    <td colspan="1" class="right">Zobrazeno <strong><?= $pager->getTotalItemCount(); ?></strong> položek</td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="center"><?= $this->formSelect("eg_action", NULL, NULL, array("no" => "Žádná akce", "delete" => "Odstranit zvolené řádky", "update-cpc" => "Opravit počáteční CPC ceny")) . $this->formSubmit("submit-action", "OK"); ?></td>
+                </tr>
+            </tfoot>
+            <tbody>
+                <?php foreach ($smmvsgm->fetchAll($pager->getCurrentItems()) as $row) { ?>
+                    <tr>
+                        <td class="center"><?= $this->formCheckbox("eg_id[" . $row->getEgId() . "]"); ?></td>   
+                        <td><?= $row->getViewEgTsUpdate(); ?></td>                    
+                        <td><?= (($row->getEgSklikId() > 0) ? $row->getEgSklikId() : NULL); ?></td>                    
+                        <td class="center"><a href="<?= $this->url(array('controller' => 'sklik', 'action' => 'local2keyword'), 'default', true) . Sklik_Model_Primary_Helper::getParamsGet(array("group_id" => $row->getEgId())) ?>"><?= $row->getEgTgKeywordCount(); ?></a></td>
+                        <td><?= $row->getEgGroupName() ?></td>
+                        <td><input type="number" name="eg_group_cpc[<?= $row->getEgId() ?>]" min="20" max="300" step="10" <?= (($row->getEgSklikId() > 0) ? 'disabled="disabled"' : NULL ) ?> value="<?= $row->getEgGgroupCpc(); ?>"></td>
+                        <td><a href="<?= $row->getViewUrlGroup() ?>"><?= substr($row->getViewUrlGroup(), strlen(Sklik_Model_Primary_Config::SKLIK_CLICKTHRU_DEFAULT_URL) - 1); ?></a></td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </form>
+<?php } ?>

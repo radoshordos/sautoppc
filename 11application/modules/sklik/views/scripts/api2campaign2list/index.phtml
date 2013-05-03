@@ -1,0 +1,99 @@
+<h3>Sklik API - Campaign</h3>
+<?php
+$smmacm = new Sklik_Model_Map_Api2campaignMapper();
+$console = new Sklik_Model_Primary_Console();
+$console->addSource("campaign", $this->campaign->listCampaigns());
+?>
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Přehled kamaní</a></li>
+        <li><a href="#tabs-2">Nová kampaň</a></li>
+        <li><a href="#tabs-3">Log kampaní</a></li>
+    </ul>
+    <div id="tabs-1">
+        <div id="radio">
+            <a href="<?= $this->url(array('controller' => 'sklik', 'action' => 'api2login2sklik'), 'default', true); ?>"><span>Login</span></a>
+            <a href="<?= $this->url(array('controller' => 'sklik', 'action' => 'api2campaign2list'), 'default', true); ?>"><span>Campaign</span></a>
+        </div>
+        <form action="" method="get">
+            <table>
+                <thead>
+                    <tr>
+                        <td colspan="9" class="right"><?= $this->formSelect("campaign-mode", intval($_GET["campaign-mode"]), array('id' => 'new-media_id_variace', 'required' => 'required', "onchange" => "submit()"), array("1" => "Všechny kampaně kromě smazaných", "2" => "Zobrazit pouze aktivní kampaně", "3" => "Zobrazit všechny kampaně")); ?></td>
+                    </tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Status</th>
+                        <th>Vytvořeno</th>
+                        <th>Název<br />kampaně</th>
+                        <th>Denní<br />rozpočet</th>
+                        <th><span class="ui-icon ui-icon-trash"></span></th>
+                        <th colspan="3">Akce</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th colspan="2">Status</th>
+                        <td colspan="7"><?= $console->getStausInfo("campaign"); ?></td>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    <?php if (!$console->isEmptyNamespaceArray("campaign", "campaigns")) { ?>
+                        <?php foreach ($smmacm->fetchAll($console->getNamespaceArray("campaign", "campaigns")) as $val) { ?>
+                            <?php if (((intval($_GET["campaign-mode"]) <= 1) && (intval($val->getRemoved())) == 0) || (intval($_GET["campaign-mode"]) == 2) && (intval($val->getRemoved())) == 0 && ($val->getStatus() == "active") || (intval($_GET["campaign-mode"]) == 3)) { ?>
+                                <tr>
+                                    <td><?= $val->getId(); ?></td>
+                                    <td><?= $val->getStatus(); ?></td>
+                                    <td><?= Sklik_Model_Primary_Date::timestamp2Date_Ymd($val->getCreateDate()); ?></td>
+                                    <td><?= $val->getName(); ?></td>
+                                    <td class="right"><?= intval($val->getDayBudget() / 100); ?> Kč</td>
+                                    <td><?= (($val->getRemoved()) ? "ANO" : "NE"); ?></td>
+                                    <td class="center"><a href="<?= $this->url(array('controller' => 'sklik', 'action' => 'api2group2list'), 'default', true); ?>?campaign_id=<?= intval($val->getId()) ?>"><span class="ui-icon ui-icon-zoomin"></span></a></td>
+                                    <td class="center"><a href="<?= $this->url(array('controller' => 'sklik', 'action' => 'api2campaign2list'), 'default', true); ?>?campaign_restore_id=<?= intval($val->getId()) ?>"><span class="ui-icon ui-icon-arrowrefresh-1-n"></span></a></td>                                    
+                                    <td class="center"><a href="<?= $this->url(array('controller' => 'sklik', 'action' => 'api2campaign2list'), 'default', true); ?>?campaign_delete_id=<?= intval($val->getId()) ?>"><span class="ui-icon ui-icon-closethick"></span></a></td>
+                                </tr>
+                            <?php } ?>
+                        <?php } ?>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div id="tabs-2">
+        <form action="<?= $this->url(array('controller' => 'sklik', 'action' => 'api2campaign2list'), 'default', true); ?>" method="post">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2">Nová kampaň</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <td colspan="2"><?= $this->formSubmit("create-new-campaign", "Vytvořit kampaň"); ?></td>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <th>Název kampaně</th>
+                        <td><?= $this->formText("name", $_POST["name"], array('size' => '64', 'maxlength' => '72', 'required' => 'required')); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Denní rozpočet (haléřů) </th>
+                        <td><input name="dayBudget" type="number" value="2000" min="2000" max="50000" step="100" required="required"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div id="tabs-3">
+        <table>
+            <tbody>
+                <tr>
+                    <td>
+                        <textarea cols="150" rows="42"><?php print_r($console->getNamespaceNoSession("campaign")); ?></textarea>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

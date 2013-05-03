@@ -1,0 +1,75 @@
+<h3>Lokální sestavy (Groups)</h3>
+<?php
+$sf = new Sklik_Model_Primary_SelectForm();
+$db = Model_Zendb::myfactory();
+$select = $db->select();
+$select->from("view2sklik2db", array("ed_id", "ec_name", "view_name"))
+        ->joinLeft("em2keyword", "em2keyword.ek_id_db = view2sklik2db.ed_id")
+        ->where("edm_alias = ?", "keyword")
+        ->where("ek_id_group IS NULL")
+        ->where((intval($_GET["key_dev"]) > 0) ? $db->quoteInto("view_id_dev = ?", intval($_GET['key_dev'])) : "1=1")
+        ->where((intval($_GET["key_tree"]) > 0) ? $db->quoteInto("view_id_tree = ?", intval($_GET['key_tree'])) : "1=1")
+        ->where((strlen($_POST["search_view_name"]) > 0) ? $db->quoteInto("view_name LIKE ?", "%" . $_POST['search_view_name'] . "%") : "1=1");
+
+$pager = new Zend_Paginator(new Zend_Paginator_Adapter_DbSelect($select));
+$pager->setCurrentPageNumber(intval($_GET['page']))->setItemCountPerPage(($_GET["limit"]) ? $_GET["limit"] : 25)->setPageRange(5);
+$pageLinks = new Model_Paginator($pager);
+?>
+
+<form action="" method="get">
+    <table>
+        <thead>
+            <tr>
+                <th>Výrobce</th>
+                <th>Skupina</th>                        
+                <th>Limit</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><?= $this->formSelect("key_dev", $_GET["key_dev"], array("onchange" => "submit()"), $sf->getSelectDevInModeKeywordWithEmpty()); ?></td>
+                <td><?= $this->formSelect("key_tree", $_GET["key_tree"], array("onchange" => "submit()"), $sf->getSelectTreeInModeKeywordWithEmpty()); ?></td>               
+                <td><?= $this->formSelect("limit", $_GET["limit"], array("onchange" => "submit()"), array('25' => '25', '100' => '100', '400' => '400')); ?></td>                
+            </tr>
+        </tbody>
+    </table>
+</form>
+<?php if ($pager->getTotalItemCount() > 0) { ?>
+    <form action="" method="post">
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2" class="center"><?= $this->formCheckbox("checkAllAuto"); ?></th>
+                    <th rowspan="2">Kampaň</th>
+                    <th>Název</th>
+                </tr>
+                <tr>
+                    <td><?= $this->formText('search_view_name', $_POST['search_view_name'], array("id" => "search_view_name", "size" => "54", "maxlength" => "80")); ?></td>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="center" id="paginator"><?= implode($pageLinks->getPageLinks(), "") . " | Zobrazeno <strong>" . $pager->getTotalItemCount() . "</strong> položek"; ?></td>
+                </tr>            
+                <tr>
+                    <th colspan="3">Přidat klíčové slovo do skupiny</th>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <?= $this->formSelect("key_group", $_POST["key_group"], array("style" => "font-size: larger"), $sf->getSelectGroup()); ?>
+                        <?= $this->formSubmit("key-to-group", "Provést") ?>
+                    </td>
+                </tr>
+            </tfoot>
+            <tbody>
+                <?php foreach ($pager->getCurrentItems() as $row) { ?>
+                    <tr>
+                        <td><?= $this->formCheckbox("ed_key_id[" . $row->ek_id . "]"); ?></td>
+                        <td><?= $row->ec_name; ?></td>
+                        <td><?= $row->view_name; ?></td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </form>
+<?php } ?>

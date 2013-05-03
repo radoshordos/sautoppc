@@ -1,0 +1,38 @@
+﻿<h3>Posledních 30 přihlášení</h3>
+<?php
+$db = Model_Zendb::myfactory();
+if (Zend_Auth::getInstance()->getStorage()->read()->au_role == 'admins') {
+    $res = $db->fetchAll($db->select()
+                    ->from("adm2conect")
+                    ->order(array("ac_id DESC"))
+                    ->limit(30));
+} else {
+    $res = $db->fetchAll($db->select()
+                    ->from("adm2conect")
+                    ->where("ac_id_adm2users = ?", intval(Zend_Auth::getInstance()->getStorage()->read()->au_id))
+                    ->order(array("ac_id DESC"))
+                    ->limit(30));
+}
+?>
+<table>
+    <thead class="center">
+        <tr>
+            <th>Login</th>
+            <th>Čas</th>
+            <th>IP Adresa</th>
+            <th>NetBIOS</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (count($res) > 0) { ?>
+            <?php foreach ($res as $row) { ?>
+                <tr>
+                    <td><?= $row->ac_string_loginname; ?></td>
+                    <td><?= date("d.m.Y H:i", $row->ac_ti_connect); ?></td>
+                    <td><?= $row->ac_pc_ip_addr; ?></td>
+                    <td><?= $row->ac_pc_netbios; ?></td>
+                </tr>
+            <?php } ?>
+        <?php } ?>
+    </tbody>
+</table>

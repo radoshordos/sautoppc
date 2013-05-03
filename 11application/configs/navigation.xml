@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <nav>
+        <sklik>
+            <label>Sklik</label>
+            <uri>#</uri>
+            <resource>sklik</resource>
+            <pages>
+                <sklik2api>
+                    <label>Sklik Remote API</label>
+                    <controller>sklik</controller>
+                    <action>api2login2sklik</action>
+                    <resource>sklik:api2login2sklik</resource>
+                </sklik2api>
+                <sklik2local2db>
+                    <label>Sklik Local DB</label>
+                    <controller>sklik</controller>
+                    <action>local2db</action>
+                    <resource>sklik:local2db</resource>
+                </sklik2local2db>
+                <sklik2local2group2rules>
+                    <label>Sklik Local DB => Group</label>
+                    <controller>sklik</controller>
+                    <action>local2db2group</action>
+                    <resource>sklik:local2db2group</resource>
+                </sklik2local2group2rules>               
+                <sklik2local2group2keywords>
+                    <label>Sklik Local DB => Keyword</label>
+                    <controller>sklik</controller>
+                    <action>local2db2keyword</action>
+                    <resource>sklik:local2db2keyword</resource>
+                </sklik2local2group2keywords>               
+                <sklik2local2keyword>
+                    <label>Sklik Local Keyword</label>
+                    <controller>sklik</controller>
+                    <action>local2keyword</action>
+                    <resource>sklik:local2keyword</resource>
+                </sklik2local2keyword>               
+                <sklik2local2ad>
+                    <label>Sklik Local Ad</label>
+                    <controller>sklik</controller>
+                    <action>local2ad</action>
+                    <resource>sklik:local2ad</resource>
+                </sklik2local2ad>
+                <sklik2local2final>
+                    <label>Sklik Local FINAL</label>
+                    <controller>sklik</controller>
+                    <action>local2final</action>
+                    <resource>sklik:local2final</resource>
+                </sklik2local2final>                
+                <sklik2automatic>
+                    <label>Sklik Automatic</label>
+                    <controller>sklik</controller>
+                    <action>auto2list</action>
+                    <resource>sklik:auto2list</resource>
+                </sklik2automatic>
+            </pages>
+        </sklik>
+
+        <administator>
+            <label>Administator</label>
+            <uri>#</uri>
+            <resource>administator</resource>
+            <pages>
+                <user2acount>
+                    <label>Správa uživatelů</label>
+                    <controller>admin</controller>
+                    <action>user2acount</action>
+                    <resource>admin:user2acount</resource>
+                </user2acount>         
+            </pages>
+        </administator>
+        
+                        
+        <logout>
+            <label>Logout</label>
+            <module>default</module>
+            <controller>authentication</controller>
+            <action>logout</action>
+            <resource>default:authentication</resource>
+            <privilege>logout</privilege>
+            <pages>
+                <change2passwd>
+                    <label>Změna hesla</label>
+                    <controller>logout</controller>
+                    <action>change2passwd</action>
+                    <resource>logout:change2passwd</resource>
+                </change2passwd>                                
+                <actual2user>
+                    <label>Aktuální užívatel</label>
+                    <controller>logout</controller>
+                    <action>actual2user</action>
+                    <resource>logout:actual2user</resource>
+                </actual2user>
+                <connect2last>
+                    <label>Historie přihlášení</label>
+                    <controller>logout</controller>
+                    <action>connect2last</action>
+                    <resource>logout:connect2last</resource>
+                </connect2last>
+            </pages>
+        </logout>
+        <login>
+            <label>Login</label>
+            <module>default</module>
+            <controller>authentication</controller>
+            <action>login</action>
+            <resource>default:authentication</resource>
+            <privilege>login</privilege>
+        </login>
+    </nav>
+</config>

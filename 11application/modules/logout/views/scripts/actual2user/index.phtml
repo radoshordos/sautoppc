@@ -1,0 +1,49 @@
+<h3>Aktuální přihlášený uživatel</h3>
+<?php
+$ui = new Logout_Model_UserInfo();
+$userinfo = $ui->getUserInfo();
+?>
+<h4>Informace o uživateli</h4>
+<table>
+    <tbody>
+        <tr>
+            <th><label for="ar_name">Role: </label></th>
+            <td><?= $this->formText('ar_name', $userinfo["au_role"], array("id" => "ar_name", "size" => "32", "maxlength" => "32", "readonly" => "readonly")); ?></td>
+        </tr>
+        <tr>
+            <th><label for="au_loginname">Přihlašovací jméno: </label></th>
+            <td><?= $this->formText('au_loginname', $userinfo["au_loginname"], array("id" => "au_loginname", "size" => "32", "maxlength" => "32", "readonly" => "readonly")); ?></td>
+        </tr>
+        <tr>
+            <th><label for="au_name">Jméno: </label></th>
+            <td><?= $this->formText('au_name', $userinfo["au_name"], array("id" => "au_name", "size" => "32", "maxlength" => "24", "readonly" => "readonly")); ?></td>
+        </tr>
+        <tr>
+            <th><label for="au_surname">Příjmení: </label></th>
+            <td><?= $this->formText('au_surname', $userinfo["au_surname"], array("id" => "au_surname", "size" => "32", "maxlength" => "32", "readonly" => "readonly")); ?></td>
+        </tr>
+    </tbody>
+</table>
+
+<h4>Informace o přihlášení</h4>
+
+<table>
+    <tbody>
+        <tr>
+            <th><label for="ac_ti_connect">ČAS PŘIHLÁŠENÍ</label></th>
+            <td><?= $this->formText('ac_ti_connect', Model_Datum::Strtotime2DateAndTime($userinfo["ac_ti_connect"]), array("id" => "ac_ti_connect", "size" => "32", "maxlength" => "32", "readonly" => "readonly")); ?></td>
+        </tr>
+        <tr>
+            <th><label for="ac_pc_ip_addr">IP ADDRESA</label></th>
+            <td><?= $this->formText('ac_pc_ip_addr', $userinfo["ac_pc_ip_addr"], array("id" => "ac_pc_ip_addr", "size" => "32", "maxlength" => "32", "readonly" => "readonly")); ?></td>
+        </tr>
+        <tr>
+            <th><label for="ac_pc_netbios">NETBIOS</label></th>
+            <td><?= $this->formText('ac_pc_netbios', $userinfo["ac_pc_netbios"], array("id" => "ac_pc_netbios", "size" => "32", "maxlength" => "32", "readonly" => "readonly")); ?></td>
+        </tr>
+        <tr>
+            <th><label for="ac_pc_browser">INTERNETOVÝ PROHLÍŽEČ</label></th>
+            <td><?= $this->formText('ac_pc_browser', $userinfo["ac_pc_browser"], array("id" => "ac_pc_browser", "size" => "128", "maxlength" => "255", "readonly" => "readonly")); ?></td>
+        </tr>       
+    </tbody>
+</table>

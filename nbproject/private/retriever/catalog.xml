@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="http://www.w3.org/1999/xhtml" uri="www.w3.org/1999/xhtml/index"/>
+    <system systemId="http://opengraphprotocol.org/schema/" uri="ogp.me/index"/>
+    <system systemId="http://www.facebook.com/2008/fbml" uri="www.facebook.com/l.php.u_http_/ogp.me/ns/fb_h__aqhtrdla"/>
+</catalog>

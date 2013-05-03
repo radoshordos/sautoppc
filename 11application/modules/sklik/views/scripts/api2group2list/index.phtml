@@ -1,0 +1,93 @@
+<h3>GROUP LIST</h3>
+<?php
+$console = new Sklik_Model_Primary_Console();
+$console->addSource("group", $this->group->listGroups(intval($_GET["campaign_id"])));
+$smmagm = new Sklik_Model_Map_Api2groupMapper();
+?>
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Přehled sestav</a></li>
+        <li><a href="#tabs-2">Nová sestava</a></li>
+        <li><a href="#tabs-3">Log sestav</a></li>
+    </ul>
+    <div id="tabs-1">
+        <table>
+            <thead>
+                <tr>
+                    <td colspan="9" class="right">
+                        <a href="<?= $this->url(array('controller' => 'sklik', 'action' => 'api2campaign2list'), 'default', true); ?>"><?= $this->formButton("campaign2list", "Kampaně", array("style" => "padding:2px 15px")); ?></a>
+                    </td>
+                </tr>        
+                <tr>
+                    <th>ID</th>
+                    <th>Status</th>
+                    <th>Vytvořeno</th>
+                    <th>Cena za<br />proklik</th>
+                    <th>Název sestavy</th>
+                    <th><span class="ui-icon ui-icon-trash"></span></th>
+                    <th colspan="3">Akce</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <th colspan="2">Status</th>
+                    <td colspan="7"><?= $console->getStausInfoWithCount("group", "groups"); ?></td>
+                </tr>
+            </tfoot>
+            <tbody>
+                <?php if (!$console->isEmptyNamespaceArray("group", "groups")) { ?>
+                    <?php foreach ($smmagm->fetchAll($console->getNamespaceArray("group", "groups")) as $val) { ?>
+                        <tr>
+                            <td><?= $val->getId(); ?></td>
+                            <td><?= $val->getStatus(); ?></td>
+                            <td><?= Sklik_Model_Primary_Date::timestamp2Date_Ymd_hm($val->getCreateDate()); ?></td>
+                            <td><?= $val->getCpc(); ?> hal</td>
+                            <td><?= $val->getName(); ?></td>
+                            <td><?= (($val->getRemoved()) ? "ANO" : "NE"); ?></td>                            
+                            <td class="center"><a href="<?= $this->url(array('controller' => 'sklik', 'action' => 'api2group2manage'), 'default', true) . Sklik_Model_Primary_Helper::getParamsGet(array("group_id" => intval($val->getId()))) ?>"><span class="ui-icon ui-icon-zoomin"></span></a></td>
+                            <td class="center"><a href="<?= $this->url(array('controller' => 'sklik', 'action' => 'api2group2list'), 'default', true) . Sklik_Model_Primary_Helper::getParamsGet(array("campaign_id" => intval($_GET["campaign_id"]), "group_restore_id" => intval($val->getId()))); ?>"><span class="ui-icon ui-icon-arrowrefresh-1-n"></span></a></td>
+                            <td class="center"><a href="<?= $this->url(array('controller' => 'sklik', 'action' => 'api2group2list'), 'default', true) . Sklik_Model_Primary_Helper::getParamsGet(array("campaign_id" => intval($_GET["campaign_id"]), "group_delete_id" => intval($val->getId()))); ?>"><span class = "ui-icon ui-icon-closethick"></span></a></td>
+                        </tr>
+                    <?php } ?>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+    <div id="tabs-2">
+        <form action="" method="post">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2">Nová sestava</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <td colspan="2"><?= $this->formSubmit("create-new-group", "Vytvořit sestavu"); ?></td>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <th>Název sestavy</th>
+                        <td><?= $this->formText("name", $_POST["name"], array('size' => '64', 'maxlength' => '72', 'required' => 'required')); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Maximální cena klikutí v haléřích</th>
+                        <td><input name="cpc" type="number" value="20" min="20" max="320" step="10" required="required"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div id="tabs-3">
+        <table>
+            <tbody>
+                <tr>
+                    <td>
+                        <textarea cols="150" rows="42"><?php print_r($console->getNamespaceNoSession("group")); ?></textarea>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

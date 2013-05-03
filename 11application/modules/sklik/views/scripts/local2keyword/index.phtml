@@ -1,0 +1,154 @@
+<h3>Lokální správa - Klíčové slova</h3>
+<?php
+$db = Model_Zendb::myfactory();
+$smmvsfm = new Sklik_Model_Map_View2sklik2keywordMapper();
+$sf = new Sklik_Model_Primary_SelectForm();
+$select = $db->select();
+
+switch (intval($_GET['sklik'])) {
+    case 2 : $select->where('ek_sklik_id > 0');
+        break;
+    case 3 : $select->where('ek_sklik_id = 0');
+        break;
+}
+
+switch (intval($_GET["finsert"])) {
+    case 1 : $select->where("ek_id_type = 1");
+        break;
+    case 2 : $select->where("ek_id_type = 2");
+        break;
+}
+
+switch (intval($_GET["sortby"])) {
+    case 2 : $select->order(array("eg_group_name", "ek_keyword"));
+        break;
+    case 3 : $select->order(array("eg_tg_keyword_count DESC"));
+        break;
+    case 4 : $select->order(array("ek_keyword_cpc DESC"));
+        break;
+    case 5 : $select->order(array("ek_ti_create DESC", "ek_id"));
+        break;
+    case 6 : $select->order(array("ek_ts_update DESC", "ek_id"));
+        break;    
+    default: $select->order(array("ek_keyword"));
+        break;
+}
+
+$select->from("view2sklik2keyword")
+        ->where((intval($_GET["group_id"]) > 0) ? $db->quoteInto("ek_id_group = ?", intval($_GET["group_id"])) : "1=1")
+        ->where((intval($_GET["match"]) > 0) ? $db->quoteInto("ek_id_match = ?", intval($_GET["match"])) : "1=1")
+        ->where((strlen($_POST["search_group"]) > 0) ? $db->quoteInto("eg_group_name LIKE ?", "%" . $_POST["search_group"] . "%") : "1=1")
+        ->where((strlen($_POST["search_match"]) > 0) ? $db->quoteInto("ekm_code LIKE ?", "%" . $_POST["search_match"] . "%") : "1=1")
+        ->where((strlen($_POST["search_keyword"]) > 0) ? $db->quoteInto("ek_keyword LIKE ?", "%" . $_POST["search_keyword"] . "%") : "1=1")
+        ->order(array("ek_id_group", "ek_keyword", "ek_id_match"));
+
+$pager = new Zend_Paginator(new Zend_Paginator_Adapter_DbSelect($select));
+$pager->setCurrentPageNumber(intval($_GET["page"]))->setItemCountPerPage(($_GET["limit"]) ? $_GET["limit"] : 25)->setPageRange(10);
+$pageLinks = new Model_Paginator($pager);
+?>
+
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Přehled klíčových slov</a></li>
+        <?php if (intval($_GET["group_id"]) > 0) { ?><li><a href="#tabs-2">Přidat nové klíčové slova</a></li><?php } ?>
+    </ul>
+    <div id="tabs-1">
+        <form action="" method="get">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sklik</th>
+                        <th>Insert</th>
+                        <th>Shoda</th>
+                        <th>Řadit</th>
+                        <th>Limit</th>                        
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><?= $this->formSelect("sklik", $_GET["sklik"], array("onchange" => "submit()"), array('1' => '', '2' => 'ANO', '3' => 'NE')); ?></td>                                        
+                        <td><?= $this->formSelect("finsert", $_GET["finsert"], array("onchange" => "submit()"), array("0" => "[A/N]", "1" => "Auto", "2" => "Manual")); ?></td>
+                        <td><?= $this->formSelect("match", $_GET["match"], array("onchange" => "submit()"), $sf->getSelectKeywordMatchLiteWithEmpty()); ?></td>
+                        <td><?= $this->formSelect("sortby", $_GET["sortby"], array("onchange" => "submit()"), array("1" => "podle Názvu klíčového slova", "2" => "podle Názvu skupiny", "3" => "podle Počtu klýčových slov", "4" => "podle CPC", "5" => "podle Data vytoření", "6" => "podle Data poslení změny")); ?></td>
+                        <td><?= $this->formSelect("limit", $_GET["limit"], array("onchange" => "submit()"), array("25" => "25", "100" => "100", "400" => "400")); ?></td>                                        
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+        <?php if ($pager->getTotalItemCount() > 0) { ?>        
+            <form action="" method="post">
+                <table>
+                    <thead>
+                        <tr class="center">
+                            <th><span class="ui-icon ui-icon-circle-check"></span></th>
+                            <th rowspan="2">Poslední<br />změna</th>                            
+                            <th rowspan="2">Sklik ID</th>
+                            <th rowspan="2">Insert</th>
+                            <th>Název sestavy</th>
+                            <th rowspan="2">Shoda</th>
+                            <th>Název klíčového slova</th>
+                            <th rowspan="2">CPC<br />(hal)</th>
+                        </tr>
+                        <tr>
+                            <th><?= $this->formCheckbox("checkAllAuto"); ?></th>
+                            <th><?= $this->formText("search_group", $_POST["search_group"], array("id" => "search_group", "size" => "16", "maxlength" => "64")); ?></th>
+                            <th><?= $this->formText("search_keyword", $_POST["search_keyword"], array("id" => "search_keyword", "size" => "32", "maxlength" => "64")); ?></th>
+                        </tr>
+                    </thead>
+                    <tfoot>        
+                        <tr>
+                            <td colspan="6" id="paginator"><?= implode($pageLinks->getPageLinks(), ""); ?></td>
+                            <td colspan="2" class="right">Zobrazeno <strong><?= $pager->getTotalItemCount(); ?></strong> položek</td>
+                        </tr>
+                        <tr>
+                            <td colspan="8" class="center"><?= $this->formSelect("ek_action", NULL, NULL, array("no" => "Žádná akce", "delete" => "Odstranit zvolené řádky", "update-match" => "Změnit shodu slov")) . $this->formSubmit("submit-action", "OK"); ?></td>
+                        </tr>            
+                    </tfoot>
+                    <tbody>                    
+                        <?php foreach ($smmvsfm->fetchAll($pager->getCurrentItems()) as $row) { ?>
+                            <tr>	 
+                                <td class="center"><?= $this->formCheckbox("ek_id[" . $row->getEkId() . "]"); ?></td>
+                                <td><?= $row->getViewEkTsUpdate(); ?></td>      
+                                <td class="center"><?= (($row->getEkSklikId() > 0) ? $row->getEkSklikId() : NULL); ?></td>
+                                <td class="center"><?= $row->getEktName(); ?> </td>
+                                <td><a href="<?= $this->url(array("controller" => "sklik", "action" => "local2keyword"), "default", true) . Sklik_Model_Primary_Helper::getParamsGet(array("group_id" => $row->getEgId())) ?>"><?= $row->getEgGroupName(); ?></a></td>
+                                <td><?= $this->formSelect("key_match[" . $row->getEgId() . "]", $row->getEkIdMatch(), (($row->getEkSklikId() > 0) ? array("disabled" => "disabled") : NULL), $sf->getSelectKeywordMatchPozitive()); ?></td>
+                                <td><?= $row->getEkmStringBefore() . $row->getEkKeyword() . $row->getEkmStringAfter(); ?></td>
+                                <td><?= ($row->getEkKeywordCpc() > 0 ? $row->getEkKeywordCpc() : NULL); ?></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </form>
+        <?php } ?>
+    </div>
+    <?php if (intval($_GET["group_id"]) > 0) { ?>
+        <div id="tabs-2">
+            <form action="#tabs-1" method="post">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Klíčové slova</th>
+                            <th>Shoda</th>
+                            <th>CPC (haléřů)</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3"><?= $this->formSubmit("add-new-keyword", "Přidat klíčové slovo"); ?></td>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <?php for ($i = 0; $i < 10; $i++) { ?>
+                            <tr>
+                                <td><?= $this->formText("new-keyword[$i]", NULL, array("pattern" => ".{4,}", "title" => "Alespoň 4 znaky", "size" => "32", "maxlength" => "64")); ?></td>
+                                <td><?= $this->formSelect("new-match[$i]", NULL, NULL, $sf->getSelectKeywordMatch()); ?></td>
+                                <td><input type="number" name="new-keyword-cpc[<?= $i ?>]" min="20" max="300" step="10" value=""></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    <?php } ?>
+</div>

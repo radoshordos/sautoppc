@@ -1,0 +1,89 @@
+<h3>Reklamní kampaně</h3>
+<?php
+$sf = new Sklik_Model_Primary_SelectForm();
+$smmvsfm = new Sklik_Model_Map_View2sklik2finalMapper();
+$db = Model_Zendb::myfactory();
+$select = $db->select();
+
+switch (intval($_GET['sklik'])) {
+    case 2 : $select->where('ega_sklik_id > 0');
+        break;
+    case 3 : $select->where('ega_sklik_id = 0');
+        break;
+}
+
+$select->from("view2sklik2final")
+        ->where((intval($_GET["campagin"]) > 0) ? $db->quoteInto("ed_id_campaign = ?", intval($_GET['campagin'])) : "1=1")
+        ->where((intval($_GET["key_dev"]) > 0) ? $db->quoteInto("view_id_dev = ?", intval($_GET['key_dev'])) : "1=1")
+        ->where((intval($_GET["key_tree"]) > 0) ? $db->quoteInto("view_id_tree = ?", intval($_GET['key_tree'])) : "1=1")
+        ->where((intval($_GET["ad"]) > 0) ? $db->quoteInto("ega_id_ad = ?", intval($_GET['ad'])) : "1=1")
+        ->order(array("ega_id"));
+
+$pager = new Zend_Paginator(new Zend_Paginator_Adapter_DbSelect($select));
+$pager->setCurrentPageNumber(intval($_GET['page']))->setItemCountPerPage(($_GET["limit"]) ? $_GET["limit"] : 25)->setPageRange(10);
+$pageLinks = new Model_Paginator($pager);
+$list = $smmvsfm->fetchAll($pager->getCurrentItems());
+?>
+
+<form action="" method="get">
+    <table>
+        <tbody>
+            <tr class="head">
+                <th>Kampaň</th>
+                <th>Výrobce</th>
+                <th>Skupina</th>                        
+                <th>Sklik</th>                
+                <th>Limit</th>
+            </tr>
+            <tr>
+                <td><?= $this->formSelect("campagin", $_GET["campagin"], array("onchange" => "submit()"), $sf->getSelectCampaignListActiveWithEmpty()); ?></td>
+                <td><?= $this->formSelect("key_dev", $_GET["key_dev"], array("onchange" => "submit()"), $sf->getSelectDevInModeGroupWithEmpty()); ?></td>
+                <td><?= $this->formSelect("key_tree", $_GET["key_tree"], array("onchange" => "submit()"), $sf->getSelectTreeInModeGroupWithEmpty()); ?></td>               
+                <td><?= $this->formSelect("sklik", $_GET["sklik"], array("onchange" => "submit()"), array('1' => '', '2' => 'ANO', '3' => 'NE')); ?></td>                
+                <td><?= $this->formSelect("limit", $_GET["limit"], array("onchange" => "submit()"), array('25' => '25', '100' => '100', '400' => '400')); ?></td>                
+            </tr>
+            <tr class="head">
+                <th colspan="5">Šablona banneru</th>
+            </tr>            
+            <tr>
+                <td colspan="5"><?= $this->formSelect("ad", $_GET["ad"], array("onchange" => "submit()"), $sf->getSelectAdWithEmpty()); ?></td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Sklik ID</th>
+            <th>Skupina</th>
+            <th colspan="2">Titulek</th>
+            <th colspan="2">Řádek 1</th>
+            <th colspan="2">Řádek 2</th>
+            <th>Odkaz</th>
+        </tr>
+    </thead>
+    <tfoot>        
+        <tr>
+            <td colspan="7" id="paginator"><?= implode($pageLinks->getPageLinks(), ""); ?></td>
+            <td colspan="2" class="right">Celkem <strong><?= $pager->getTotalItemCount(); ?></strong> položek</td>
+        </tr>
+    </tfoot>
+    <tbody>
+        <?php if (!empty($list)) { ?>
+            <?php foreach ($list as $row) { ?>
+                <tr>
+                    <td><?= (($row->getEgaSklikId() > 0) ? $row->getEgaSklikId() : NULL); ?></td>
+                    <td><?= $row->getEgGroupName(); ?></td>
+                    <td><?= $row->getEgaCreative1(); ?></td>
+                    <td style="<?= (strlen($row->getEgaCreative1()) > Sklik_Model_Primary_Config::SKLIK_STRING_TITLE_LENGHT_LIMIT ? "background:red" : NULL ) ?>"><?= strlen($row->getEgaCreative1()); ?></td>
+                    <td><?= $row->getEgaCreative2(); ?></td>
+                    <td style="<?= (strlen($row->getEgaCreative2()) > Sklik_Model_Primary_Config::SKLIK_STRING_DESC_LENGHT_LIMIT ? "background:red" : NULL ) ?>"><?= strlen($row->getEgaCreative2()); ?></td>
+                    <td><?= $row->getEgaCreative3(); ?></td>
+                    <td style="<?= (strlen($row->getEgaCreative3()) > Sklik_Model_Primary_Config::SKLIK_STRING_DESC_LENGHT_LIMIT ? "background:red" : NULL ) ?>"><?= strlen($row->getEgaCreative3()); ?></td>
+                    <td><a href="<?= $row->getEgaClickthruUrl(); ?>"><?= $row->getEgaClickthruText(); ?></a></td>
+                </tr>
+            <?php } ?>
+        <?php } ?>
+    </tbody>
+</table>

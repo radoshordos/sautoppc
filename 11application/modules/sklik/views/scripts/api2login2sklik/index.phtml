@@ -1,0 +1,61 @@
+<h3>Sklik API</h3>
+<?php
+$console = new Sklik_Model_Primary_Console();
+$console->addSource("result", $this->result);
+$console->addSource("api", $this->api);
+$console->addSource("client", $this->client);
+?>
+
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Přihlášení</a></li>
+        <li><a href="#tabs-3">Stav spojení</a></li>
+        <li><a href="#tabs-4">Client log</a></li>
+    </ul>
+    <div id="tabs-1">
+        <div style="margin: 20px">
+            <?= $console->getStausInfo("result"); ?>
+        </div>
+        <div id="radio">
+            <a style="font-size: large" href="<?= $this->url(array('controller' => 'sklik', 'action' => 'api2campaign2list'), 'default', true); ?>"><span>Campaign</span></a>
+        </div>
+    </div>
+    <div id="tabs-3">
+        <?php if ($console->isExistsNamespace('api')) { ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>VersionNumber</th>
+                        <th>VersionName</th>
+                        <th>StatusMessage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="center">
+                        <td><?= $console->getNamespaceArray("api", "status"); ?></td>
+                        <td><?= $console->getNamespaceArray("api", "versionNumber"); ?></td>
+                        <td><?= $console->getNamespaceArray("api", "versionName"); ?></td>
+                        <td><?= $console->getNamespaceArray("api", "statusMessage"); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        <?php } ?>
+    </div>
+    <div id="tabs-4">
+        <table>
+            <thead>
+                <tr>
+                    <th>SKLIK</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <textarea name="debug" cols="250" rows="42"><?php print_r($console->getNamespace("client")); ?></textarea>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</ul>
